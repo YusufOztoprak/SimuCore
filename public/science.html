@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SimuCore Science Lab</title>
+
+    <!-- MathJax Ayarları: $ işaretini tanıması için bu scripti ekliyoruz -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 40px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1, h2 {
+            color: #2196F3;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+        .card {
+            background: #1e1e1e;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 1px solid #333;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .equation {
+            background: #252525;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.3em;
+            border-left: 4px solid #4caf50;
+        }
+        a.back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #4caf50;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        a.back-link:hover {
+            text-decoration: underline;
+        }
+        strong { color: #fff; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="/" class="back-link">← Back to Simulation</a>
+
+    <h1>🔬 The Science Behind SimuCore</h1>
+    <p>SimuCore is not just a game; it's a biological simulation engine driven by real-world ecological mathematics. Here is how the magic happens:</p>
+
+    <div class="card">
+        <h2>1. Allometric Scaling (Kleiber's Law)</h2>
+        <p>Instead of guessing stats for animals, we use <strong>Allometric Scaling</strong>. Biological rates scale with body mass ($M$) according to power laws.</p>
+
+        <div class="equation">
+            $$ R \propto M^{0.75} $$
+        </div>
+        <p><strong>Metabolic Rate ($R$):</strong> Larger animals consume more energy overall, but are more efficient per gram of tissue.</p>
+
+        <div class="equation">
+            $$ r \propto M^{-0.25} $$
+        </div>
+        <p><strong>Reproduction Rate ($r$):</strong> Smaller animals reproduce significantly faster. For example, a mouse reproduces exponentially faster than an elephant.</p>
+    </div>
+
+    <div class="card">
+        <h2>2. Logistic Growth (Plants)</h2>
+        <p>Plants follow the logistic growth model, limited by space and resources (Carrying Capacity, $K$).</p>
+        <div class="equation">
+            $$ \frac{dN}{dt} = rN \left(1 - \frac{N}{K}\right) $$
+        </div>
+        <p>Where $N$ is the population, $r$ is growth rate, and $K$ is the maximum capacity.</p>
+    </div>
+
+    <div class="card">
+        <h2>3. Lotka-Volterra Equations (Predator-Prey)</h2>
+        <p>The core of the simulation models the cycle of life and death between hunters and the hunted.</p>
+
+        <h3>Prey Equation (Herbivores)</h3>
+        <div class="equation">
+            $$ \frac{dH}{dt} = rH - aHP $$
+        </div>
+        <p>Prey ($H$) grow at rate $r$, but are eaten by Predators ($P$) at rate $a$.</p>
+
+        <h3>Predator Equation (Carnivores)</h3>
+        <div class="equation">
+            $$ \frac{dP}{dt} = bHP - mP $$
+        </div>
+        <p>Predators ($P$) grow by eating Prey ($b$ is efficiency) and die naturally at rate $m$.</p>
+    </div>
+</div>
+
+</body>
+</html>

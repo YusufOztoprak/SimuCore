@@ -32,9 +32,18 @@ const Simulation = sequelize.define(
             allowNull: false,
         },
 
+        // Stores simulation parameters (e.g., temperature, environment size)
         parameters: {
             type: DataTypes.JSONB,
             allowNull: false,
+            defaultValue: {},
+        },
+
+        // Stores initial population counts (e.g., { "Wolf": 10, "Rabbit": 50 })
+        initialState: {
+            type: DataTypes.JSONB,
+            allowNull: false,
+            defaultValue: {},
         },
 
         result: {

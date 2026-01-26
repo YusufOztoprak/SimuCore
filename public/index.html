@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SimuCore Grand Savanna</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background-color: #1a1a1a; color: #e0e0e0; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+    header { background-color: #2d3436; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; }
+    .main-container { display: flex; flex: 1; height: calc(100vh - 60px); }
+
+    /* Forest/Savanna Background */
+    #world-container {
+      flex: 2;
+      position: relative;
+      background: linear-gradient(to bottom, #556B2F, #8FBC8F); /* Savanna Green Gradient */
+      border-right: 1px solid #333;
+      overflow: hidden;
+    }
+
+    canvas#simCanvas { display: block; width: 100%; height: 100%; }
+    #sidebar { flex: 1; max-width: 400px; background-color: #2d3436; display: flex; flex-direction: column; padding: 20px; gap: 20px; overflow-y: auto; }
+    .control-panel, .chart-container { background: #353b48; padding: 15px; border-radius: 8px; border: 1px solid #444; }
+    .btn { width: 100%; padding: 12px; background: linear-gradient(45deg, #00b894, #00cec9); border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
+    .btn:hover { opacity: 0.9; transform: scale(1.02); }
+    .btn:disabled { background: #636e72; cursor: not-allowed; }
+
+    .stats-overlay { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.6); padding: 15px; border-radius: 12px; pointer-events: none; min-width: 180px; backdrop-filter: blur(5px); max-height: 80vh; overflow-y: hidden; display: flex; flex-direction: column; flex-wrap: wrap; border: 1px solid rgba(255,255,255,0.1); }
+    .stat-item { margin-bottom: 5px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; width: 100%; }
+
+    a.science-link { color: #74b9ff; text-decoration: none; font-weight: bold; border: 1px solid #74b9ff; padding: 5px 15px; border-radius: 20px; transition: 0.3s; }
+    a.science-link:hover { background: #74b9ff; color: #2d3436; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h3>SimuCore Grand Savanna 🌍</h3>
+  <a href="/science" class="science-link">🔬 Science Lab</a>
+  <div id="tickDisplay" style="font-size: 1.2em; font-weight: bold; color: #55efc4;">TICK: 0</div>
+</header>
+
+<div class="main-container">
+  <div id="world-container">
+    <canvas id="simCanvas"></canvas>
+    <div id="statsList" class="stats-overlay">
+      <div style="color: #aaa; text-align: center;">Waiting for data...</div>
+    </div>
+  </div>
+
+  <div id="sidebar">
+    <div class="control-panel">
+      <button id="startBtn" class="btn" onclick="startSimulation()">🚀 Start Grand Simulation</button>
+    </div>
+    <div class="chart-container">
+      <canvas id="popChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  let chartInstance = null;
+  let particles = [];
+  const canvas = document.getElementById('simCanvas');
+  const ctx = canvas.getContext('2d');
+
+  // Emoji Mapping for Visuals
+  const emojiMap = {
+    "Lion": "🦁", "Cheetah": "🐆", "Leopard": "🐆", "Spotted Hyena": "🐕", "African Wild Dog": "🐕",
+    "Nile Crocodile": "🐊", "African Bush Elephant": "🐘", "Giraffe": "🦒", "Plains Zebra": "🦓",
+    "Wildebeest": "🐂", "Thomson’s Gazelle": "🦌", "Impala": "🦌", "Warthog": "🐗", "Meerkat": "🐿️",
+    "Savanna Grass": "🌿", "Acacia Tree": "🌳", "Baobab Tree": "🌳"
+  };
+
+  function resizeCanvas() {
+    canvas.width = document.getElementById('world-container').clientWidth;
+    canvas.height = document.getElementById('world-container').clientHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  function initChart() {
+    const ctxChart = document.getElementById('popChart').getContext('2d');
+    chartInstance = new Chart(ctxChart, {
+      type: 'line',
+      data: { labels: [], datasets: [] },
+      options: {
+        animation: false,
+        scales: { x: { display: false }, y: { beginAtZero: true, grid: { color: '#444' } } },
+        plugins: { legend: { display: false } }
+      }
+    });
+  }
+  initChart();
+
+  socket.on('simulation-update', (payload) => {
+    const { tick, data } = payload;
+    document.getElementById('tickDisplay').innerText = `TICK: ${tick}`;
+    const statsContainer = document.getElementById('statsList');
+    statsContainer.innerHTML = '';
+
+    Object.keys(data).sort().forEach(speciesName => {
+      const count = data[speciesName];
+      const emoji = emojiMap[speciesName] || "🐾";
+
+      if (count > 0) {
+        const statDiv = document.createElement('div');
+        statDiv.className = 'stat-item';
+        statDiv.innerHTML = `<span>${emoji} ${speciesName}</span> <b>${count}</b>`;
+        statsContainer.appendChild(statDiv);
+      }
+
+      let dataset = chartInstance.data.datasets.find(d => d.label === speciesName);
+      if (!dataset) {
+        dataset = {
+          label: speciesName,
+          borderColor: `hsl(${Math.random() * 360}, 70%, 60%)`,
+          data: new Array(chartInstance.data.labels.length).fill(0),
+          tension: 0.1, pointRadius: 0, borderWidth: 1
+        };
+        chartInstance.data.datasets.push(dataset);
+      }
+      dataset.data.push(count);
+      syncParticles(speciesName, count);
+    });
+
+    chartInstance.data.labels.push(tick);
+    if (chartInstance.data.labels.length > 50) {
+      chartInstance.data.labels.shift();
+      chartInstance.data.datasets.forEach(d => d.data.shift());
+    }
+    chartInstance.update();
+  });
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+      if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+      // Draw Emoji instead of Dot
+      ctx.font = `${p.size}px Arial`;
+      ctx.fillText(p.emoji, p.x, p.y);
+    });
+    requestAnimationFrame(animate);
+  }
+  animate();
+
+  function syncParticles(type, count) {
+    const currentParticles = particles.filter(p => p.type === type);
+    const visualCount = Math.min(count, 40); // Limit for performance
+    const diff = visualCount - currentParticles.length;
+    const emoji = emojiMap[type] || "🐾";
+
+    // Bitki mi kontrolü (Hızlarını sıfırlamak için)
+    const isPlant = ["Savanna Grass", "Acacia Tree", "Baobab Tree"].includes(type);
+
+    if (diff > 0) {
+      for (let i = 0; i < diff; i++) {
+        particles.push({
+          type: type,
+          emoji: emoji,
+          size: Math.random() * 10 + 15,
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          // Eğer bitkiyse hızı 0 olsun, değilse hareket etsin
+          vx: isPlant ? 0 : (Math.random() - 0.5) * 1.5,
+          vy: isPlant ? 0 : (Math.random() - 0.5) * 1.5
+        });
+      }
+    } else if (diff < 0) {
+      let removed = 0;
+      for (let i = particles.length - 1; i >= 0; i--) {
+        if (particles[i].type === type && removed < Math.abs(diff)) {
+          particles.splice(i, 1);
+          removed++;
+        }
+      }
+    }
+  }
+
+  async function startSimulation() {
+    const btn = document.getElementById('startBtn');
+    btn.disabled = true;
+    try {
+      const initialState = {
+        "Savanna Grass": 50000, "Acacia Tree": 2000, "Wildebeest": 400, "Plains Zebra": 300,
+        "Thomson’s Gazelle": 500, "African Bush Elephant": 30, "Giraffe": 50, "Lion": 25,
+        "Spotted Hyena": 40, "Cheetah": 15, "Nile Crocodile": 20
+      };
+
+      const createRes = await fetch('/simulations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: "Grand Savanna Simulation",
+          maxTick: 2000,
+          parameters: { temperature: 30 },
+          initialState: initialState
+        })
+      });
+      const simData = await createRes.json();
+      if (!simData.success) throw new Error(simData.message);
+      await fetch(`/simulations/${simData.data.id}/start`, { method: 'POST' });
+
+      chartInstance.data.labels = [];
+      chartInstance.data.datasets = [];
+      chartInstance.update();
+      particles = [];
+    } catch (err) {
+      console.error(err);
+      alert("Error: " + err.message);
+      btn.disabled = false;
+    }
+    setTimeout(() => { btn.disabled = false; }, 3000);
+  }
+</script>
+</body>
+</html>

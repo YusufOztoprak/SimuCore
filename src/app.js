@@ -1,11 +1,20 @@
 const express = require("express");
+const path = require("path");
 const app = express();
 
 app.use(express.json());
 
-// Basit kontrol rotası (Tarayıcıdan test etmek için)
+// Serve static files from the "public" directory
+app.use(express.static(path.join(__dirname, "../public")));
+
+// Serve the dashboard on the root route
 app.get("/", (req, res) => {
-    res.send("SimuCore API is running 🚀");
+    res.sendFile(path.join(__dirname, "../public/index.html"));
+});
+
+// Serve the science page
+app.get("/science", (req, res) => {
+    res.sendFile(path.join(__dirname, "../public/science.html"));
 });
 
 const simulationRoutes = require("./modules/simulation/simulation.routes");

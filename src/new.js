@@ -19,7 +19,7 @@ exports.createSimulation = async (req, res) => {
 
 exports.startSimulation = async (req, res) => {
     try {
-        const { id } = req.params;
+        const {id} = req.params;
         const result = await simulationService.runSimulation(id);
         res.status(200).json({
             success: true,
