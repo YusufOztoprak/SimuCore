@@ -4,8 +4,6 @@
 
 > 🎯 Goal: provide a backend-first, extensible ecosystem simulation that is **scientifically meaningful**, **data-driven**, and **engineered like a real system** (not a toy model).
 
-![Simulation Dashboard](https://via.placeholder.com/800x400?text=SimuCore+Dashboard+Preview)
-
 ---
 
 ## 🎯 Who Is This For?
