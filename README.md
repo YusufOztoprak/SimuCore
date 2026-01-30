@@ -13,7 +13,7 @@
 - Backend developers interested in scientific simulations
 - Students working on ecology, AI, evolutionary systems, or complex systems
 - Researchers or hobbyists prototyping ecosystem dynamics
-- TÜBİTAK / academic project submissions requiring technical depth
+- Academic project submissions requiring technical depth
 
 ---
 
