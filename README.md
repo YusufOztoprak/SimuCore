@@ -33,39 +33,34 @@ The simulation is built on well-established ecological and mathematical models.
 
 ### Allometric Scaling (Kleiber-like)
 
-Biological parameters are derived from average body mass \(M\):
+Species parameters are derived from average body mass (M):
 
-- Metabolic rate / consumption: \(R \propto M^{0.75}\)
-- Reproduction rate: \(r \propto M^{-0.25}\)
-- Mortality: inversely related to lifespan and scaled by mass
+- Metabolic rate / consumption ∝ M^0.75  
+- Reproduction rate ∝ M^-0.25  
+- Mortality inversely related to lifespan and mass  
 
-This allows species parameters to **emerge from biology**, not manual tuning.
+This prevents manual tuning and ensures biologically consistent behavior.
 
 ---
 
 ### Logistic Growth (Plants)
 
-Plant biomass follows logistic growth limited by carrying capacity \(K\), reduced by herbivore grazing:
+Plant biomass grows logistically under a carrying capacity K and is reduced by herbivore grazing.
 
-\[
-\frac{dN}{dt} = rN\left(1 - \frac{N}{K}\right) - G(N, H)
-\]
-
-In the simulation, this is approximated using a discrete-time update:
-
-\[
-N_{t+1} = N_t + \Delta t \left[ rN_t\left(1 - \frac{N_t}{K}\right) - G(N_t, H_t) \right]
-\]
-
-Herbivory \(G(N,H)\) is modeled using standard ecological functional responses (e.g. Holling Type II).
+Growth is based on the classical logistic equation with an additional consumption term.
 
 <details>
-<summary><strong>Implementation details</strong></summary>
+<summary><strong>Mathematical formulation</strong></summary>
 
-- Example grazing model:
-  \( G = c \cdot H \cdot \frac{N}{N + h} \)
-- Population values are clamped to avoid numerical instability
-- Equations may be rendered using KaTeX in documentation builds
+dN/dt = rN(1 − N/K) − G(N, H)
+
+Discrete-time approximation:
+
+N(t+1) = N(t) + Δt [ rN(t)(1 − N(t)/K) − G(N(t), H(t)) ]
+
+Herbivory is modeled using standard functional responses (e.g. Holling Type II):
+
+G = c · H · N / (N + h)
 
 </details>
 
